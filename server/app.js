@@ -4,10 +4,11 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const sequelize = require("./database");
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const passport = require('passport');
+const jwt = require('jsonwebtoken');
 // routes 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 
 // models
 
@@ -17,7 +18,7 @@ var tasksModel = require('./model/tasks');
 var app = express();
 
 
-
+// database
 async function dbConnect(params) {
   try {
     await sequelize.authenticate();
@@ -27,7 +28,7 @@ async function dbConnect(params) {
 
     const hashedPassword = await bcrypt.hash("123456", 10)
     const user1 = await usersModel.create({ phone: "0722222222", password: hashedPassword });
-    console.log(user1.password);
+
     await user1.save();
 
 
@@ -37,6 +38,43 @@ async function dbConnect(params) {
 }
 
 dbConnect();
+
+
+// passport
+require('./passport');
+
+// const initializePassport =
+
+// initializePassport(
+//   passport,
+//  async phonePar => {
+
+// var res = await usersModel.findOne({
+//   where: {
+//     phone: phonePar
+//   }
+// }).then(res => {
+
+//   console.log("getUserByPhone res" + JSON.stringify(res));
+//   return res;
+// });
+
+// return res;
+
+//   },
+//   async idPar => {
+//     var res = await   usersModel.findAll({
+//       where: {
+//         id: idPar
+//       }
+//     }).then(res => {
+//       console.log("getUserById res" + JSON.stringify(res)); 
+//       return res;
+//     })
+//   },
+// )
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -49,7 +87,44 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+
+// app.post('/personnel/login', passport.authenticate('local', {
+//   successRedirect: '/',
+//   failureRedirect: '/login',
+//   failureFlash: true
+// }))
+
+/* POST login. */
+app.post('/personnel/login', function (req, res, next) {
+  passport.authenticate('local', { session: false }, (err, user, info) => {
+    if (err || !user) {
+      console.log("user eros " + JSON.stringify(user))
+      console.log("error eros " + JSON.stringify(err))
+      return res.status(400).json({
+        message: 'Something is not right',
+        user: user
+      });
+    }
+    req.login(user, { session: false }, (err) => {
+      if (err) {
+        res.send(err);
+      }
+      // generate a signed son web token with the contents of user object and return it in the response
+      const token = jwt.sign(user, 'your_jwt_secret', {
+        expiresIn: "24h" // it will be expired after 24 hours
+      });
+      return res.json(
+        {
+          "reset_password": 0, 
+          "accessToken": token,
+          "expires_in":"24h"
+
+        }
+      );
+    });
+  })(req, res);
+});
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
