@@ -49,21 +49,6 @@ passport.use(new LocalStrategy({
 },
   async function (phonePar, password, cb) {
 
-    //Assume there is a DB module pproviding a global UserModel
-    // return UserModel.findOne({email, password})
-    //     .then(user => {
-    // if (!user) {
-    //     return cb(null, false, {message: 'Incorrect email or password.'});
-    // }
-
-    // return cb(null, user, {
-    //     message: 'Logged In Successfully'
-    // });
-    //     })
-    //     .catch(err => {
-    //         return cb(err);
-    //     });
-
     try {
       var user = await usersModel.findOne({
         where: {
@@ -72,20 +57,20 @@ passport.use(new LocalStrategy({
       })
         .then(res => {
 
-          console.log("getUserByPhone res" + JSON.stringify(res));
+
           return res;
         });
 
 
       if (!user) {
-        return cb(null, false, {"error" : { "phone": 'phone not found.' }});
+        return cb(null, false, { "error": { "phone": 'phone not found.' } });
       }
 
 
       if (await bcrypt.compare(password, user.password)) {
         console.log("sucess ...........");
 
-        return cb(null, {id:user.id}, {
+        return cb(null, { id: user.id }, {
           message: 'Logged In Successfully'
         })
       } else {
@@ -94,7 +79,7 @@ passport.use(new LocalStrategy({
       }
 
     } catch (e) {
-      console.log("eerrrr  userr........ " + e);
+
       return cb(e)
     }
 
@@ -105,15 +90,23 @@ passport.use(new JWTStrategy({
   jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
   secretOrKey: 'your_jwt_secret'
 },
-  function (jwtPayload, cb) {
-
-    //find the user in db if needed
-    return UserModel.findOneById(jwtPayload.id)
-      .then(user => {
-        return cb(null, user);
-      })
-      .catch(err => {
-        return cb(err);
+  async function (jwtPayload, cb) {
+    // query postgres
+    try {
+      var res = await usersModel.findAll({
+        where: {
+          id: idPar
+        }
+      }).then(res => {
+        // console.log("getUserById res" + JSON.stringify(res));
+        return res;
       });
+
+      return cb(null, res);
+    } catch (e) {
+
+      return cb(e)
+    }
+
   }
 ));

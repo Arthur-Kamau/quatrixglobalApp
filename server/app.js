@@ -63,14 +63,7 @@ require('./passport');
 
 //   },
 //   async idPar => {
-//     var res = await   usersModel.findAll({
-//       where: {
-//         id: idPar
-//       }
-//     }).then(res => {
-//       console.log("getUserById res" + JSON.stringify(res)); 
-//       return res;
-//     })
+   
 //   },
 // )
 
@@ -88,22 +81,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 
-// app.post('/personnel/login', passport.authenticate('local', {
-//   successRedirect: '/',
-//   failureRedirect: '/login',
-//   failureFlash: true
-// }))
+
 
 /* POST login. */
 app.post('/personnel/login', function (req, res, next) {
   passport.authenticate('local', { session: false }, (err, user, info) => {
     if (err || !user) {
-      console.log("user eros " + JSON.stringify(user))
-      console.log("error eros " + JSON.stringify(err))
-      return res.status(400).json({
-        message: 'Something is not right',
-        user: user
-      });
+      return res.json(info);
     }
     req.login(user, { session: false }, (err) => {
       if (err) {
@@ -115,9 +99,9 @@ app.post('/personnel/login', function (req, res, next) {
       });
       return res.json(
         {
-          "reset_password": 0, 
+          "reset_password": 0,
           "accessToken": token,
-          "expires_in":"24h"
+          "expires_in": "24h"
 
         }
       );
