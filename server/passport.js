@@ -91,14 +91,16 @@ passport.use(new JWTStrategy({
   secretOrKey: 'your_jwt_secret'
 },
   async function (jwtPayload, cb) {
-    // query postgres
+
+
+// query postgres
     try {
       var res = await usersModel.findAll({
         where: {
-          id: idPar
+          id: jwtPayload.id
         }
       }).then(res => {
-        // console.log("getUserById res" + JSON.stringify(res));
+        console.log("getUserById res" + JSON.stringify(res));
         return res;
       });
 

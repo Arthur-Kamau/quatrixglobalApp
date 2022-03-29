@@ -2,9 +2,16 @@ const { Sequelize, DataTypes, Model } = require('sequelize');
 const sequelize = require("../database");
 
 const Tasks = sequelize.define("tasks", {
+    id: {
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true,
+    },
     taskId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     customerFirstName: {
         type: DataTypes.STRING,
@@ -20,7 +27,7 @@ const Tasks = sequelize.define("tasks", {
     },
     customerLastName: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     customerPhone: {
         type: DataTypes.STRING,
@@ -41,11 +48,11 @@ const Tasks = sequelize.define("tasks", {
     },
     completed: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: true
     },
     deferred: {
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: true
     },
     status: {
         type: DataTypes.STRING,
@@ -53,31 +60,31 @@ const Tasks = sequelize.define("tasks", {
     },
     location: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     gender: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     age: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     accessCode: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     splashPage: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     mpesa: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     autoplay: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
     comments: {
         type: DataTypes.STRING,
