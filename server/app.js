@@ -3,11 +3,40 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+const sequelize = require("./database");
+const bcrypt = require('bcrypt')
+// routes 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
+// models
+
+var usersModel = require('./model/user');
+var tasksModel = require('./model/tasks');
+
 var app = express();
+
+
+
+async function dbConnect(params) {
+  try {
+    await sequelize.authenticate();
+    console.log('Connection has been established successfully.');
+    await sequelize.sync();
+    console.log('tables created ...');
+
+    const hashedPassword = await bcrypt.hash("123456", 10)
+    const user1 = await usersModel.create({ phone: "0722222222", password: hashedPassword });
+    console.log(user1.password);
+    await user1.save();
+
+
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
+}
+
+dbConnect();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -23,12 +52,12 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
